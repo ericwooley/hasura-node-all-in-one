@@ -1,7 +1,8 @@
 import fs from 'fs/promises'
 import { join } from 'path'
 import express from 'express'
-
+import yargs from 'yargs'
+import { hideBin } from 'yargs/helpers'
 interface Module {
   name: string
   use: express.RequestHandler
@@ -10,7 +11,7 @@ interface Module {
   post: express.RequestHandler
   delete: express.RequestHandler
 }
-async function main({ apiBaseDir }: { apiBaseDir: string }) {
+async function main({ apiBaseDir, port, verbose }: { apiBaseDir: string; port: number; verbose: boolean }) {
   const files = await fs.readdir(apiBaseDir, { withFileTypes: true })
   const loadedFiles: Module[] = files.map((file) => {
     const mod = require(join(apiBaseDir, file.name))
@@ -24,6 +25,10 @@ async function main({ apiBaseDir }: { apiBaseDir: string }) {
     } as Module
   })
   const app = express()
+  app.use((req, res, next) => {
+    console.log(req.route)
+    next()
+  })
   loadedFiles.forEach((file) => {
     const route = `/${file.name}`
     if (file.use) app.use(route, file.use)
@@ -32,11 +37,44 @@ async function main({ apiBaseDir }: { apiBaseDir: string }) {
     if (file.post) app.post(route, file.post)
     if (file.delete) app.delete(route, file.delete)
   })
-  app.listen(3000, () => {
-    console.log('listening on port 3000')
+  app.listen(port, () => {
+    if (verbose) console.log(`Listening on port ${port}`)
   })
   console.log(loadedFiles)
 }
 if (process.argv[1] === __filename) {
-  main({ apiBaseDir: join(process.cwd(), 'hasura-custom-endpoints', 'routes') })
+  yargs(hideBin(process.argv))
+    .option('verbose', {
+      alias: 'v',
+      type: 'boolean',
+      description: 'Run with verbose logging',
+      default: false,
+    })
+    .command(
+      'serve',
+      'start the server',
+      (yargs) => {
+        return yargs
+          .option('port', {
+            alias: 'p',
+            describe: 'port to bind on',
+            default: 3000,
+          })
+          .option('dev', {
+            alias: 'd',
+            describe: 'watch and invalidate routes on file changes',
+            default: false,
+          })
+          .option('apiBaseDir', {
+            alias: 'a',
+            describe: 'directory to load api files from',
+            default: join(process.cwd(), 'hasura-custom-endpoints', 'routes'),
+          })
+      },
+      (argv) => {
+        if (argv.verbose) console.info(`starting server on :${argv.port}...`)
+        main(argv)
+      }
+    )
+    .parse()
 }
