@@ -12,7 +12,7 @@ interface Module {
 }
 async function main({ apiBaseDir }: { apiBaseDir: string }) {
   const files = await fs.readdir(apiBaseDir, { withFileTypes: true })
-  const loadedFiles = files.map((file) => {
+  const loadedFiles: Module[] = files.map((file) => {
     const mod = require(join(apiBaseDir, file.name))
     return {
       name: file.name.replace(/\.(t|j)sx?$/, ''),
@@ -21,7 +21,7 @@ async function main({ apiBaseDir }: { apiBaseDir: string }) {
       put: mod.put,
       post: mod.post,
       delete: mod.delete,
-    }
+    } as Module
   })
   const app = express()
   loadedFiles.forEach((file) => {
