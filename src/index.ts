@@ -3,6 +3,7 @@ import { join } from 'path'
 import express from 'express'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
+console.log('args:', process.argv)
 interface Module {
   name: string
   use: express.RequestHandler
@@ -89,6 +90,7 @@ const args = yargs(hideBin(process.argv))
     async (argv) => {
       if (argv.verbose) console.info(`starting server on :${argv.port}...`)
       if (argv.dev) {
+        console.log('starting in dev mode....')
         const { default: chokidar } = await import('chokidar')
         let stop: () => Promise<void> = () => Promise.resolve()
         const filesToWatch = join(argv.apiBaseDir, '**/*.ts*')
