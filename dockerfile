@@ -1,7 +1,10 @@
 FROM hasura/graphql-engine
-RUN apt-get update
-RUN apt-get install nodejs -y
+RUN apt-get update && apt-get install wget -y
+RUN wget https://nodejs.org/dist/v16.13.2/node-v16.13.2-linux-x64.tar.gz
+RUN tar --strip-components 1 -xzf node-v16.13.2-linux-x64.tar.gz
+RUN echo $(node --version)
+RUN npm install -g yarn
 WORKDIR /usr/src/app
 COPY . .
-RUN npm ci
+RUN yarn install --frozen-lockfile
 ENTRYPOINT [ "node", "dist/index.js" ]

@@ -8,7 +8,8 @@
   "license": "MIT",
   "scripts": {
     "build": "rm -rf dist && tsc",
-    "dev": "concurrently -n app,tsc 'nodemon --watch src --exec \"ts-node --transpile-only ./src/index.ts\"' 'tsc --preserveWatchOutput --watch'"
+    "build:docker": "npm run build && docker build . -t hasura-all-in-one",
+    "dev": "concurrently --kill-others --success first  -n app,tsc 'nodemon --watch src --exec \"ts-node --transpile-only ./src/index.ts serve --dev --verbose\"' 'tsc --preserveWatchOutput --watch'"
   },
   "devDependencies": {
     "@types/chokidar": "^2.1.3",

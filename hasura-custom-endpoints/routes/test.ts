@@ -4,3 +4,5 @@ export function get(req, res) {
   res.json({ works: true })
   res.end()
 }
+
+console.log('test')
