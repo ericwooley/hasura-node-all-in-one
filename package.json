@@ -8,11 +8,12 @@
   "license": "MIT",
   "scripts": {
     "build": "rm -rf dist && tsc",
-    "build:docker": "npm run build && docker build --no-cache . -t hasura-all-in-one",
-    "run:docker": "yarn run build:docker && docker run -p 3000:3000 -it --rm -v hasura-custom-endpoints:/usr/src/app hasura-all-in-one",
-    "run:docker:debug": "yarn run build:docker && docker run -p 3000:3000 -it --rm -v hasura-custom-endpoints:/usr/src/app hasura-all-in-one /bin/bash",
+    "build:docker": "npm run build && docker build . -t hasura-all-in-one",
+    "run:docker": "yarn run build:docker && docker run -p 3000:3000 -it --rm -v ./hasura-custom-endpoints:/usr/src/app/hasura-custom-endpoints hasura-all-in-one",
+    "run:docker:debug": "yarn run build:docker && docker run -p 3000:3000 -it --rm -v ./hasura-custom-endpoints:/usr/src/app/hasura-custom-endpoints hasura-all-in-one /bin/bash",
     "dev": "concurrently --kill-others --success first  -n app,tsc 'nodemon --watch src --exec \"ts-node --transpile-only ./src/index.ts serve --dev --verbose\"' 'tsc --preserveWatchOutput --watch'",
-    "start": "echo 'test' && node -r ts-node/register/transpile-only --enable-source-maps ./dist/index.js serve --dev --verbose"
+    "start": "node -r ts-node/register/transpile-only --enable-source-maps ./dist/index.js serve --dev --verbose",
+    "start:prod": "node -r ts-node/register/transpile-only --enable-source-maps ./dist/index.js serve --dev --verbose",
   },
   "devDependencies": {
     "@types/chokidar": "^2.1.3",
